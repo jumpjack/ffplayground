@@ -1,10 +1,17 @@
+let ffmpegLoaded = false;
+
 async function executeCommand(file, commandArgs) {
   const { createFFmpeg, fetchFile } = FFmpeg;
   const ffmpeg = createFFmpeg({ log: true });
 
   const { name } = file;
 
-  await ffmpeg.load();
+  if (!ffmpegLoaded) {
+    await ffmpeg.load();
+    ffmpegLoaded = true;
+  }
+
+  
   ffmpeg.FS("writeFile", name, await fetchFile(file));
 
   // Using .apply here to pass in args as an array
