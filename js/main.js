@@ -1,4 +1,4 @@
-import { handleExecuteEvent } from "./modules/executeEventHandler.js";
+import { handleExecuteEvent } from "https://jumpjack.github.io/ffplayground/modules/executeEventHandler.js";
 
 document
   .getElementById("execute")
