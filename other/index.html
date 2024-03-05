@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Convertitore di immagini con ffmpeg.js</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ffmpeg.js/0.9.5/ffmpeg.min.js"></script>
+<script>
+async function convertImage() {
+    const inputURL = "input.jpg";
+    const outputURL = "output.jpg";
+    const command = `-i ${inputURL} -vf v360=fieheye:e ${outputURL}`;
+
+    const { createFFmpeg, fetchFile } = FFmpeg;
+    const ffmpeg = createFFmpeg({ log: true });
+
+    await ffmpeg.load();
+
+    ffmpeg.FS("writeFile", "input.jpg", await fetchFile(inputURL));
+
+    await ffmpeg.run(...command.split(" "));
+
+    const data = ffmpeg.FS("readFile", "output.jpg");
+    const url = URL.createObjectURL(new Blob([data.buffer], { type: "image/jpeg" }));
+
+    const image = document.createElement("img");
+    image.src = url;
+    document.body.appendChild(image);
+}
+
+convertImage();
+</script>
+</head>
+<body>
+</body>
+</html>
