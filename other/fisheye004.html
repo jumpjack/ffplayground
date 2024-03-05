@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fisheye to Equirectangular</title>
+</head>
+<body>
+  <canvas id="outputCanvas" width="800" height="400"></canvas>
+  <script>
+    window.onload = function() {
+console.log("Win loaded");	
+      // Imposta l'immagine fisheye di input
+      const fisheyeImage = new Image();
+      fisheyeImage.src = "fisheye_image.jpg"; // Inserisci il percorso dell'immagine fisheye
+
+      fisheyeImage.onload = function() {
+console.log("Img loaded");	  
+        // Crea un canvas per il risultato
+        const outputCanvas = document.getElementById("outputCanvas");
+        const ctx = outputCanvas.getContext("2d");
+
+        // Imposta le dimensioni del canvas per il risultato
+        outputCanvas.width = fisheyeImage.width;
+        outputCanvas.height = fisheyeImage.height;
+
+        // Converte l'immagine fisheye in equirettangolare
+        const equirectangularImage = fisheyeToEquirectangular(fisheyeImage);
+
+        // Disegna l'immagine equirettangolare sul canvas
+        ctx.drawImage(equirectangularImage, 0, 0, outputCanvas.width, outputCanvas.height);
+      };
+    };
+
+    function fisheyeToEquirectangular(fisheyeImage) {
+console.log(1);	
+      // Crea un canvas temporaneo per la conversione
+      const tempCanvas = document.createElement("canvas");
+      const tempCtx = tempCanvas.getContext("2d");
+
+      // Imposta le dimensioni del canvas temporaneo
+      tempCanvas.width = fisheyeImage.width;
+      tempCanvas.height = fisheyeImage.height;
+
+      // Disegna l'immagine fisheye sul canvas temporaneo
+      tempCtx.drawImage(fisheyeImage, 0, 0);
+
+      // Crea un nuovo canvas per l'immagine equirettangolare
+      const equirectangularCanvas = document.createElement("canvas");
+      const equirectangularCtx = equirectangularCanvas.getContext("2d");
+
+      // Imposta le dimensioni del canvas equirettangolare
+      equirectangularCanvas.width = fisheyeImage.width;
+      equirectangularCanvas.height = fisheyeImage.height;
+
+      // Calcola la distanza massima dall'origine
+      const maxDistance = Math.sqrt(Math.pow(fisheyeImage.width / 2, 2) + Math.pow(fisheyeImage.height / 2, 2));
+
+      // Converte ogni pixel dell'immagine fisheye in coordinate equirettangolari
+      for (let x = 0; x < fisheyeImage.width; x++) {
+        for (let y = 0; y < fisheyeImage.height; y++) {
+          const dx = x - fisheyeImage.width / 2;
+          const dy = y - fisheyeImage.height / 2;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+
+          // Calcola le coordinate sferiche
+          const theta = Math.atan2(dy, dx);
+          const phi = Math.acos(distance / maxDistance);
+
+          // Calcola le coordinate cartesiane sulla sfera
+          const xSphere = Math.sin(phi) * Math.cos(theta);
+          const ySphere = Math.sin(phi) * Math.sin(theta);
+
+          // Calcola le coordinate sulla mappa equirettangolare
+          const xEqui = (xSphere + 1) * (equirectangularCanvas.width / 2);
+          const yEqui = (ySphere + 1) * (equirectangularCanvas.height / 2);
+
+          // Ottieni il colore dal canvas temporaneo e disegnalo sul canvas equirettangolare
+          const pixelData = tempCtx.getImageData(x, y, 1, 1).data;
+          equirectangularCtx.fillStyle = `rgba(${pixelData[0]}, ${pixelData[1]}, ${pixelData[2]}, ${pixelData[3] / 255})`;
+          equirectangularCtx.fillRect(xEqui, yEqui, 1, 1);
+        }
+      }
+
+      // Restituisci l'immagine equirettangolare
+      return equirectangularCanvas;
+    }
+  </script>
+</body>
+</html>
+
