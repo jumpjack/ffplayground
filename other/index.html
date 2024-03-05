@@ -9,7 +9,7 @@
 async function convertImage() {
     const inputURL = "input.jpg";
     const outputURL = "output.jpg";
-    const command = `-i ${inputURL} -vf v360=fieheye:e ${outputURL}`;
+    const command = `-i ${inputURL} -vf v360=fisheye:e ${outputURL}`;
 
     //const { createFFmpeg, fetchFile } = FFmpegWASM.FFmpeg;
 console.log(FFmpegWASM.FFmpeg);	
@@ -19,11 +19,18 @@ console.log(ffmpeg);
 
     await ffmpeg.load();
 
+console.log("loaded");	
+
     ffmpeg.FS("writeFile", "input.jpg", await fetchFile(inputURL));
+
+console.log("written");	
 
     await ffmpeg.run(...command.split(" "));
 
     const data = ffmpeg.FS("readFile", "output.jpg");
+	
+console.log("read");	
+
     const url = URL.createObjectURL(new Blob([data.buffer], { type: "image/jpeg" }));
 
     const image = document.createElement("img");
